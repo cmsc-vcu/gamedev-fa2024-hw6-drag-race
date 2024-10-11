@@ -46,5 +46,4 @@ tasks:
 
 <https://virginiacommonwealth.instructure.com/courses/105808/assignments/952983>
 
-Good luck!
-
+Good luck! 
