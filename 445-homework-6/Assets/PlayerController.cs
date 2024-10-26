@@ -1,20 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     public float moveSpeed = 5f;         // Forward movement speed
     public float rotationSpeed = 200f;   // Rotation speed
     public float driftRotationSpeed = 100f; // Drift rotation speed
+    public Text scoreText;
 
     private Rigidbody2D rb;
     private bool isDrifting = false;
     private Vector2 driftAnchorPoint;
+    private int score = 0;
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        UpdateScoreText();
     }
 
     void Update()
@@ -94,8 +98,28 @@ public class PlayerController : MonoBehaviour
     void RotateAroundAnchor(int direction)
     {
         // Rotate around the anchor point without repositioning
+        transform.position = driftAnchorPoint;
         transform.RotateAround(driftAnchorPoint, Vector3.forward, direction * driftRotationSpeed * Time.deltaTime);
     }
+        public bool IsDrifting()
+    {
+        return isDrifting;
+    }
+
+    public void IncreaseScore()
+    {
+        score += 1;
+        UpdateScoreText();
+    }
+
+    void UpdateScoreText()
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score;
+        }
+    }
+
 }
 
     // public float maxSpeed;
