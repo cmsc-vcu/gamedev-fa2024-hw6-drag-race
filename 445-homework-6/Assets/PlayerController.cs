@@ -1,18 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;         // Forward movement speed
-    public float rotationSpeed = 200f;   // Rotation speed
-    public float driftRotationSpeed = 100f; // Drift rotation speed
-    public Text scoreText;
+    public float moveSpeed = 5f;       // Speed of the player
+    public float rotationSpeed = 200f;  // Speed of rotation
+    public float driftAmount = 2f;      // How much to drift
+    public Text scoreText;              // UI Text to display the score
 
     private Rigidbody2D rb;
-    private bool isDrifting = false;
-    private Vector2 driftAnchorPoint;
     private int score = 0;
 
     void Start()
@@ -23,87 +19,35 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        HandleInput();
+        HandleMovement();
+        HandleDrift();
     }
 
-    void FixedUpdate()
+    void HandleMovement()
     {
-        // Apply constant forward movement only if not drifting
-        if (!isDrifting)
+        // Move the player forward at the set speed
+        rb.velocity = transform.up * moveSpeed;
+    }
+
+    void HandleDrift()
+    {
+        // Get input for turning
+        float turnInput = Input.GetAxis("Horizontal"); // A/D or Left/Right arrows
+        if (turnInput != 0)
         {
-            rb.velocity = transform.up * moveSpeed;
+            // Rotate based on input
+            transform.Rotate(0, 0, -turnInput * rotationSpeed * Time.deltaTime);
         }
-    }
 
-    void HandleInput()
-    {
-        // Handle left and right rotation with arrow keys
-        float rotateInput = Input.GetAxis("Horizontal"); // Left/Right arrow keys
-        if (!isDrifting)
+        // Check for drifting
+        if (Input.GetKey(KeyCode.A)) // Drifting left
         {
-            rb.angularVelocity = -rotateInput * rotationSpeed;
+            rb.MovePosition(new Vector2(transform.position.x - driftAmount * Time.deltaTime, transform.position.y));
         }
-
-        // Check for left drift with A key
-        if (Input.GetKey(KeyCode.A))
+        else if (Input.GetKey(KeyCode.D)) // Drifting right
         {
-            if (!isDrifting)
-            {
-                StartDrift(true); // Drift to the left, anchored on the left corner
-            }
-            RotateAroundAnchor(-1);
+            rb.MovePosition(new Vector2(transform.position.x + driftAmount * Time.deltaTime, transform.position.y));
         }
-        // Check for right drift with D key
-        else if (Input.GetKey(KeyCode.D))
-        {
-            if (!isDrifting)
-            {
-                StartDrift(false); // Drift to the right, anchored on the right corner
-            }
-            RotateAroundAnchor(1);
-        }
-        else
-        {
-            // Stop drifting if A or D is released
-            if (isDrifting)
-            {
-                StopDrift();
-            }
-        }
-    }
-
-    void StartDrift(bool isLeftDrift)
-    {
-        // Enter drift mode
-        isDrifting = true;
-        rb.velocity = Vector2.zero;  // Stop forward movement
-        rb.angularVelocity = 0;      // Stop any existing rotation
-        driftAnchorPoint = GetCornerPosition(isLeftDrift);
-    }
-
-    void StopDrift()
-    {
-        // Exit drift mode and resume forward movement
-        isDrifting = false;
-        rb.velocity = transform.up * moveSpeed; // Continue forward in new direction
-    }
-
-    Vector2 GetCornerPosition(bool isLeftCorner)
-    {
-        // Calculate the left or right corner based on current position and rotation
-        Vector2 offset = isLeftCorner ? new Vector2(-0.5f, 0.5f) : new Vector2(0.5f, 0.5f);
-        return (Vector2)transform.position + (Vector2)transform.TransformDirection(offset);
-    }
-
-    void RotateAroundAnchor(int direction)
-    {
-        // Rotate around the anchor point without repositioning
-        transform.position = driftAnchorPoint;
-        transform.RotateAround(driftAnchorPoint, Vector3.forward, direction * driftRotationSpeed * Time.deltaTime);
-    }
-        public bool IsDrifting()
-    {
-        return isDrifting;
     }
 
     public void IncreaseScore()
@@ -119,8 +63,132 @@ public class PlayerController : MonoBehaviour
             scoreText.text = "Score: " + score;
         }
     }
-
 }
+
+
+// using System.Collections;
+// using System.Collections.Generic;
+// using UnityEngine;
+// using UnityEngine.UI;
+
+// public class PlayerController : MonoBehaviour
+// {
+//     public float moveSpeed = 5f;         // Forward movement speed
+//     public float rotationSpeed = 200f;   // Rotation speed
+//     public float driftRotationSpeed = 100f; // Drift rotation speed
+//     public Text scoreText;
+
+//     private Rigidbody2D rb;
+//     private bool isDrifting = false;
+//     private Vector2 driftAnchorPoint;
+//     private int score = 0;
+
+//     void Start()
+//     {
+//         rb = GetComponent<Rigidbody2D>();
+//         UpdateScoreText();
+//     }
+
+//     void Update()
+//     {
+//         HandleInput();
+//     }
+
+//     void FixedUpdate()
+//     {
+//         // Apply constant forward movement only if not drifting
+//         if (!isDrifting)
+//         {
+//             rb.velocity = transform.up * moveSpeed;
+//         }
+//     }
+
+//     void HandleInput()
+//     {
+//         // Handle left and right rotation with arrow keys
+//         float rotateInput = Input.GetAxis("Horizontal"); // Left/Right arrow keys
+//         if (!isDrifting)
+//         {
+//             rb.angularVelocity = -rotateInput * rotationSpeed;
+//         }
+
+//         // Check for left drift with A key
+//         if (Input.GetKey(KeyCode.A))
+//         {
+//             if (!isDrifting)
+//             {
+//                 StartDrift(true); // Drift to the left, anchored on the left corner
+//             }
+//             RotateAroundAnchor(-1);
+//         }
+//         // Check for right drift with D key
+//         else if (Input.GetKey(KeyCode.D))
+//         {
+//             if (!isDrifting)
+//             {
+//                 StartDrift(false); // Drift to the right, anchored on the right corner
+//             }
+//             RotateAroundAnchor(1);
+//         }
+//         else
+//         {
+//             // Stop drifting if A or D is released
+//             if (isDrifting)
+//             {
+//                 StopDrift();
+//             }
+//         }
+//     }
+
+//     void StartDrift(bool isLeftDrift)
+//     {
+//         // Enter drift mode
+//         isDrifting = true;
+//         rb.velocity = Vector2.zero;  // Stop forward movement
+//         rb.angularVelocity = 0;      // Stop any existing rotation
+//         driftAnchorPoint = GetCornerPosition(isLeftDrift);
+//     }
+
+//     void StopDrift()
+//     {
+//         // Exit drift mode and resume forward movement
+//         isDrifting = false;
+//         rb.velocity = transform.up * moveSpeed; // Continue forward in new direction
+//     }
+
+//     Vector2 GetCornerPosition(bool isLeftCorner)
+//     {
+//         // Calculate the left or right corner based on current position and rotation
+//         Vector2 offset = isLeftCorner ? new Vector2(-0.5f, 0.5f) : new Vector2(0.5f, 0.5f);
+//         return (Vector2)transform.position + (Vector2)transform.TransformDirection(offset);
+//     }
+
+//     void RotateAroundAnchor(int direction)
+//     {
+//         // Rotate around the anchor point without repositioning
+//         transform.position = driftAnchorPoint;
+//         transform.RotateAround(driftAnchorPoint, Vector3.forward, direction * driftRotationSpeed * Time.deltaTime);
+//     }
+//         public bool IsDrifting()
+//     {
+//         return isDrifting;
+//     }
+
+//     public void IncreaseScore()
+//     {
+//         score += 1;
+//         UpdateScoreText();
+//     }
+
+//     void UpdateScoreText()
+//     {
+//         if (scoreText != null)
+//         {
+//             scoreText.text = "Score: " + score;
+//         }
+//     }
+
+// }
 
     // public float maxSpeed;
     // public float acc;
